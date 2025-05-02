@@ -284,168 +284,309 @@
         opacity: 0.6;
         cursor: not-allowed;
     }
+
+    /* Yeni eklenen contact-container için stiller */
+    .contact-container {
+        background: rgba(0, 0, 0, 0.7);
+        border-radius: 10px;
+        padding: 30px;
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+        color: white;
+        text-align: left;
+        animation: fadeIn 0.3s ease;
+        display: none;
+    }
+
+    .contact-container h2 {
+        color: #009dff;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .contact-container p {
+        margin-bottom: 15px;
+        line-height: 1.6;
+    }
+
+    .contact-info {
+        margin-top: 30px;
+    }
+
+    .contact-info .info-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .contact-info .info-item i {
+        margin-right: 10px;
+        color: #009dff;
+    }
+
+    .role-selection {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        margin-top: 30px;
+    }
+
+    .role-card {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        cursor: pointer;
+        width: 140px;
+        transition: all 0.3s ease;
+    }
+
+    .role-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .role-card i {
+        font-size: 40px;
+        color: #009dff;
+        margin-bottom: 15px;
+    }
+
+    .role-card h3 {
+        color: white;
+        margin-bottom: 10px;
+    }
+
+    .role-card p {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+    }
 </style>
 
 <body>
     <div class="background"></div>
     <div class="squares"></div>
 
+    <button id="backButton" class="back-button">
+        <i class="fas fa-arrow-left"></i> Geri
+    </button>
+
     <div class="content">
-        <div class="form-section">
-            <h2 style="color: white; margin-bottom: 30px;">Kayıt Ol</h2>
+        <div id="roleSelectionScreen" style="display: block;">
+            <img class="logo" src="/static/img/logo.png" alt="AuConnect Logo">
+            <h1 style="color: white; margin-bottom: 30px;">AuConnect'e Hoş Geldiniz</h1>
+            <p style="color: white; margin-bottom: 30px;">Devam etmek için hesap türünüzü seçin:</p>
             
-            {% if messages %}
-            <div id="djangoMessages">
-                {% for message in messages %}
-                <div class="message-box {{ message.tags }}">
-                    <span class="close-btn" onclick="this.parentElement.style.display='none';">×</span>
-                    {{ message }}
+            <div class="role-selection">
+                <div class="role-card" id="studentRole">
+                    <i class="fas fa-user-graduate"></i>
+                    <h3>Öğrenci</h3>
+                    <p>Ankara Üniversitesi öğrenciyim</p>
                 </div>
-                {% endfor %}
+                <div class="role-card" id="communityRole">
+                    <i class="fas fa-users"></i>
+                    <h3>Topluluk</h3>
+                    <p>Öğrenci topluluğu yetkilisiyim</p>
+                </div>
             </div>
-            {% endif %}
+        </div>
 
-            <form action="{% url 'register' %}" method="POST" id="registerForm">
+        <div id="communityContactScreen" class="contact-container" style="display: none;">
+            <h2>Topluluk Hesabı Oluşturma</h2>
+            <p>Topluluk hesabı oluşturmak için AuConnect ekibiyle iletişime geçmeniz gerekmektedir. Topluluğunuzun resmi bilgilerini ve yetki belgelerinizi bizimle paylaşmanız gerekecektir.</p>
+            <p>Topluluk hesabı onaylandıktan sonra, size özel kullanıcı adı ve şifre bilgileri verilecektir.</p>
+            
+            <div class="contact-info">
+                <h3>İletişim Bilgileri:</h3>
+                <div class="info-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>auconnectverify@gmail.com</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-phone"></i>
+                    <span>+90 555 123 4567</span>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="button" id="backToSelection">Geri Dön</button>
+            </div>
+        </div>
+
+        <div id="registerForm" style="display: none;">
+            <img class="logo" src="/static/img/logo.png" alt="AuConnect Logo">
+            <form id="registerSteps" action="{% url 'register' %}" method="POST">
                 {% csrf_token %}
-                
-                <div class="form-group">
-                    <label for="email">E-posta (@ogrenci.ankara.edu.tr)</label>
-                    <input type="email" name="email" id="email" required pattern=".*@ogrenci\.ankara\.edu\.tr$">
-                    <div id="emailStatus" class="verification-status"></div>
-                </div>
+                <!-- Rol bilgisini gizli input olarak ekle -->
+                <input type="hidden" name="role" value="student" id="roleInput">
 
-                <div class="form-group">
-                    <button type="button" id="sendVerificationCode" class="button">
-                        Doğrulama Kodu Gönder
-                    </button>
-                </div>
-
-                <div class="form-group" id="verificationCodeGroup" style="display:none;">
-                    <label for="verification_code">Doğrulama Kodu</label>
-                    <input type="text" name="verification_code" id="verification_code">
-                    <div class="verification-status" style="margin-top: 10px;">
-                        <a href="#" id="skipVerification" style="color: #999; font-size: 0.8em;">Doğrulama kodunu alamadınız mı? Doğrulamayı atla</a>
+                <div id="step1">
+                    <div class="form-group">
+                        <label for="email">Ankara Üniversitesi E-mail Adresiniz</label>
+                        <input type="email" id="email" name="email" required placeholder="ornek@ogrenci.ankara.edu.tr">
                     </div>
+                    <button type="button" id="sendVerificationCode" class="button">Doğrulama Kodu Gönder</button>
                 </div>
 
-                <div id="registrationFields" style="display:none;">
+                <div id="step2" style="display: none;">
+                    <div class="form-group">
+                        <label for="verification_code">Doğrulama Kodu</label>
+                        <input type="text" id="verification_code" name="verification_code" required placeholder="Doğrulama kodunu giriniz">
+                    </div>
+                    <button type="button" id="verifyCode" class="button">Doğrula</button>
+                </div>
+
+                <div id="step3" style="display: none;">
                     <div class="form-group">
                         <label for="username">Kullanıcı Adı</label>
-                        <input type="text" name="username" id="username" required>
+                        <input type="text" id="username" name="username" required placeholder="Kullanıcı adını giriniz">
                     </div>
-
                     <div class="form-group">
                         <label for="password">Şifre</label>
-                        <input type="password" name="password" id="password" required>
+                        <input type="password" id="password" name="password" required placeholder="Şifrenizi giriniz">
                     </div>
-
                     <div class="form-group">
                         <label for="repassword">Şifre Tekrar</label>
-                        <input type="password" name="repassword" id="repassword" required>
+                        <input type="password" id="repassword" name="repassword" required placeholder="Şifrenizi tekrar giriniz">
                     </div>
-
-                    <div class="form-group">
-                        <label for="role">Rol</label>
-                        <select name="role" id="role" required>
-                            <option value="">-- Rol Seçin --</option>
-                            <option value="student">Öğrenci</option>
-                            <option value="community">Topluluk</option>
-                        </select>
-                    </div>
-
-                    <button type="submit" class="button" style="width:100%;">Kayıt Ol</button>
+                    <button type="submit" class="button">Kayıt Ol</button>
                 </div>
             </form>
 
             <div class="form-footer">
-                Zaten hesabınız var mı? <a href="{% url 'login' %}">Giriş Yap</a>
+                Zaten bir hesabınız var mı? <a href="{% url 'login' %}">Giriş Yapın</a>
             </div>
         </div>
     </div>
 
+    <div id="messageBox" class="message-box" style="display: none;">
+        <div class="message-content">
+            <span id="messageText"></span>
+            <button id="closeMessage"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <script>
-        // Animasyonlu kareler için kod
+        // Arka plan animasyonu için kareler oluştur
         const squares = document.querySelector('.squares');
-        for (let i = 0; i < 15; i++) {
-            const s = document.createElement('div');
-            s.className = 'square';
-            s.style.left = Math.random() * 100 + '%';
-            s.style.top = Math.random() * 100 + '%';
-            s.style.animationDelay = Math.random() * 5 + 's';
-            squares.appendChild(s);
+        const createSquares = () => {
+            for (let i = 0; i < 15; i++) {
+                const square = document.createElement('div');
+                square.classList.add('square');
+                square.style.left = `${Math.random() * 100}%`;
+                square.style.top = `${Math.random() * 100}%`;
+                square.style.animationDuration = `${6 + Math.random() * 10}s`;
+                square.style.opacity = `${0.2 + Math.random() * 0.8}`;
+                square.style.height = square.style.width = `${20 + Math.random() * 40}px`;
+                squares.appendChild(square);
+            }
+        };
+        createSquares();
+
+        // Django mesajlarını göster
+        {% if messages %}
+        {% for message in messages %}
+        showMessage("{{ message }}");
+        {% endfor %}
+        {% endif %}
+
+        function showMessage(text) {
+            const messageBox = document.getElementById('messageBox');
+            const messageText = document.getElementById('messageText');
+            messageText.textContent = text;
+            messageBox.style.display = 'block';
+            
+            // 5 saniye sonra mesajı kapat
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, 5000);
         }
 
-        // Doğrulamayı atla işlevi
-        document.getElementById("skipVerification").addEventListener("click", function(e) {
-            e.preventDefault();
-            
-            if (confirm("Email doğrulamasını atlamak istediğinizden emin misiniz?")) {
-                // Doğrulama kodunu temizle ve diğer alanları göster
-                document.getElementById("verification_code").value = "";
-                document.getElementById("registrationFields").style.display = "block";
+        document.getElementById('closeMessage').addEventListener('click', () => {
+            document.getElementById('messageBox').style.display = 'none';
+        });
+
+        // Rol seçimi işlemleri
+        document.getElementById('studentRole').addEventListener('click', function() {
+            document.getElementById('roleSelectionScreen').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+            document.getElementById('roleInput').value = 'student';
+            document.getElementById('backButton').classList.add('active');
+        });
+
+        document.getElementById('communityRole').addEventListener('click', function() {
+            document.getElementById('roleSelectionScreen').style.display = 'none';
+            document.getElementById('communityContactScreen').style.display = 'block';
+            document.getElementById('backButton').classList.add('active');
+        });
+
+        document.getElementById('backToSelection').addEventListener('click', function() {
+            document.getElementById('communityContactScreen').style.display = 'none';
+            document.getElementById('roleSelectionScreen').style.display = 'block';
+            document.getElementById('backButton').classList.remove('active');
+        });
+
+        document.getElementById('backButton').addEventListener('click', function() {
+            if (document.getElementById('registerForm').style.display === 'block') {
+                document.getElementById('registerForm').style.display = 'none';
+                document.getElementById('roleSelectionScreen').style.display = 'block';
+                this.classList.remove('active');
+            } else if (document.getElementById('communityContactScreen').style.display === 'block') {
+                document.getElementById('communityContactScreen').style.display = 'none';
+                document.getElementById('roleSelectionScreen').style.display = 'block';
+                this.classList.remove('active');
+            } else if (document.getElementById('step2').style.display === 'block') {
+                document.getElementById('step2').style.display = 'none';
+                document.getElementById('step1').style.display = 'block';
+            } else if (document.getElementById('step3').style.display === 'block') {
+                document.getElementById('step3').style.display = 'none';
+                document.getElementById('step2').style.display = 'block';
             }
         });
 
-        // Form işlemleri
-        document.getElementById("sendVerificationCode").addEventListener("click", function() {
-            const email = document.getElementById("email").value;
-            const emailStatus = document.getElementById("emailStatus");
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
+        // Doğrulama kodu gönderme işlemi
+        document.getElementById('sendVerificationCode').addEventListener('click', async function() {
+            const email = document.getElementById('email').value;
+            
             if (!email.endsWith('@ogrenci.ankara.edu.tr')) {
-                emailStatus.textContent = 'Lütfen geçerli bir @ogrenci.ankara.edu.tr mail adresi girin.';
-                emailStatus.className = 'verification-status error';
+                showMessage('Sadece @ogrenci.ankara.edu.tr uzantılı mail adresi kabul ediliyor.');
                 return;
             }
-
-            // Butonu devre dışı bırak
-            this.disabled = true;
-            this.textContent = 'Gönderiliyor...';
-
-            fetch("{% url 'send_verification_code' %}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    "X-CSRFToken": csrfToken
-                },
-                body: new URLSearchParams({
-                    email: email
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
+            
+            try {
+                const response = await fetch('/send-verification-code/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: `email=${encodeURIComponent(email)}`
+                });
+                
+                const data = await response.json();
+                
                 if (data.success) {
-                    document.getElementById("verificationCodeGroup").style.display = "block";
-                    emailStatus.textContent = 'Doğrulama kodu e-posta adresinize gönderildi.';
-                    emailStatus.className = 'verification-status success';
-                    
-                    // Doğrulama kodu alanını ve diğer form alanlarını göster
-                    document.getElementById("registrationFields").style.display = "block";
+                    showMessage(data.message);
+                    document.getElementById('step1').style.display = 'none';
+                    document.getElementById('step2').style.display = 'block';
                 } else {
-                    emailStatus.textContent = data.message || 'Bir hata oluştu. Lütfen tekrar deneyin.';
-                    emailStatus.className = 'verification-status error';
-                    this.disabled = false;
-                    this.textContent = 'Doğrulama Kodu Gönder';
+                    showMessage(data.message);
                 }
-            })
-            .catch(error => {
-                emailStatus.textContent = 'Bir hata oluştu. Lütfen tekrar deneyin.';
-                emailStatus.className = 'verification-status error';
-                this.disabled = false;
-                this.textContent = 'Doğrulama Kodu Gönder';
-            });
+            } catch (error) {
+                showMessage('Bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
+            }
         });
 
-        // Şifre kontrolü
-        document.getElementById("registerForm").addEventListener("submit", function(e) {
-            const password = document.getElementById("password").value;
-            const repassword = document.getElementById("repassword").value;
-
-            if (password !== repassword) {
-                e.preventDefault();
-                alert("Şifreler eşleşmiyor!");
-            }
+        // Doğrulama kodu doğrulama işlemi
+        document.getElementById('verifyCode').addEventListener('click', function() {
+            // Burada backend doğrulaması yerine direkt adım 3'e geçiyoruz,
+            // gerçek doğrulama form submit olduğunda backend'de yapılacak
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step3').style.display = 'block';
         });
     </script>
 </body>
+</html>
 </html>

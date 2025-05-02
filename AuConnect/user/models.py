@@ -13,6 +13,14 @@ class Profile(models.Model):
     email_verified = models.BooleanField(default=False, verbose_name="Email Doğrulandı")
     verification_code = models.UUIDField(default=uuid.uuid4, verbose_name="Doğrulama Kodu")
     temporary_email = models.EmailField(null=True, blank=True, verbose_name="Geçici Email")
+    
+    # Topluluklar için eklenen alanlar
+    img = models.ImageField(upload_to='profile_images/', null=True, blank=True, verbose_name="Profil Resmi")
+    description = models.TextField(null=True, blank=True, verbose_name="Açıklama")
+    members_count = models.PositiveIntegerField(default=0, verbose_name="Üye Sayısı")
+    founded_date = models.DateField(null=True, blank=True, verbose_name="Kuruluş Tarihi")
+    website = models.URLField(null=True, blank=True, verbose_name="Web Sitesi")
+    social_media = models.JSONField(null=True, blank=True, verbose_name="Sosyal Medya Hesapları")
 
     def __str__(self):
         if self.user:
@@ -25,6 +33,11 @@ class Profile(models.Model):
             if self.user.email != self.temporary_email:
                 self.temporary_email = None
         super().save(*args, **kwargs)
+    
+    def get_image_path(self):
+        if self.img:
+            return self.img.url
+        return "/static/img/default-profile.png"
         
     class Meta:
         verbose_name = "Kullanıcı Profili"

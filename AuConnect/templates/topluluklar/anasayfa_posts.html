@@ -1,0 +1,184 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block content %}
+<main class="main-content">
+    <header class="main-header">
+        <div class="search-bar centered">
+            <form action="{% url 'anasayfa_posts' %}" method="get" style="display: flex; width: 100%;">
+                <input type="text" name="search" placeholder="Gönderi ara..." value="{{ search_query|default:'' }}">
+                <button type="submit"><i class="fas fa-search"></i></button>
+            </form>
+        </div>
+    </header>
+    
+    <div class="content">
+        <!-- Filtreler ve Gönderiler -->
+        <div class="tabs-container">
+            <div class="tabs">
+                <a href="{% url 'anasayfa_posts' %}?view=all{% if current_category %}&category={{ current_category }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                   class="tab-button {% if view_type == 'all' %}active{% endif %}">Tüm Gönderiler</a>
+                <a href="{% url 'anasayfa_posts' %}?view=following{% if current_category %}&category={{ current_category }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                   class="tab-button {% if view_type == 'following' %}active{% endif %}">Takip Edilenler</a>
+            </div>
+            
+            <div class="tab-content active">
+                {% if search_query %}
+                <div class="section">
+                    <h2 class="section-title">"{{ search_query }}" için Arama Sonuçları</h2>
+                </div>
+                {% endif %}
+                
+                {% if current_category %}
+                <div class="section">
+                    <h2 class="section-title">
+                        {% for category in categories %}
+                            {% if category.slug == current_category %}
+                                {{ category.name }} Kategorisi
+                            {% endif %}
+                        {% endfor %}
+                    </h2>
+                </div>
+                {% endif %}
+                
+                <!-- Gönderiler -->
+                <div class="section">
+                    <div class="instagram-feed">
+                        {% if posts %}
+                            {% for post in posts %}
+                                <div class="post-card" data-event-id="{{ post.id }}">
+                                    <div class="post-header">
+                                        <div class="post-author">
+                                            <div class="profile-img small">
+                                                <img src="{% static post.topluluk.get_image_path %}" alt="{{ post.topluluk.name }}">
+                                            </div>
+                                            <div class="author-info">
+                                                <h3>{{ post.topluluk.name }}</h3>
+                                                <p>{{ post.created_at|date:"d M Y, H:i" }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="post-content">
+                                        <h3>{{ post.title }}</h3>
+                                        {% if post.image %}
+                                            <div class="post-image">
+                                                <img src="{% static post.get_image_path %}" alt="{{ post.title }}">
+                                            </div>
+                                        {% endif %}
+                                        <div class="post-details">
+                                            <p>{{ post.content }}</p>
+                                            {% if post.categories.all %}
+                                                <div class="post-categories">
+                                                    {% for category in post.categories.all %}
+                                                        <a href="{% url 'anasayfa_posts' %}?category={{ category.slug }}" class="category-tag">
+                                                            {% if category.icon %}<i class="fas fa-{{ category.icon }}"></i>{% endif %}
+                                                            {{ category.name }}
+                                                        </a>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="post-card empty-feed">
+                                <div class="post-content">
+                                    <div class="empty-message">
+                                        <i class="fas fa-info-circle"></i>
+                                        {% if search_query %}
+                                            <p>"{{ search_query }}" için hiç gönderi bulunamadı.</p>
+                                        {% elif view_type == 'following' %}
+                                            <p>Takip ettiğiniz toplulukların gönderisi bulunmamaktadır.</p>
+                                            <a href="{% url 'topluluklar' %}" class="btn btn-primary">Toplulukları Keşfedin</a>
+                                        {% else %}
+                                            <p>Henüz gönderi bulunmamaktadır.</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Gönderi Detay Modal -->
+<div id="eventModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <div class="event-detail">
+            <div class="event-detail-header">
+                <div class="profile-img medium">
+                    <img id="modalCommunityImg" src="{% static 'img/community-icon.jpg' %}" alt="Topluluk">
+                </div>
+                <div class="event-detail-title">
+                    <h2 id="modalTitle"></h2>
+                    <p id="modalCommunity"></p>
+                </div>
+            </div>
+            <div class="event-detail-image">
+                <img id="modalImage" src="" alt="Gönderi Görseli">
+            </div>
+            <div class="event-detail-description">
+                <p id="modalDescription"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Modal İşlevselliği
+    const modal = document.getElementById('eventModal');
+    const postCards = document.querySelectorAll('.post-card');
+    const closeModal = document.querySelector('.close-modal');
+
+    // Gönderi kartlarına tıklama işlevselliği
+    postCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const eventId = card.getAttribute('data-event-id');
+            if (eventId) {
+                openEventModal(eventId);
+            }
+        });
+    });
+
+    // Modal kapatma
+    closeModal.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    // Dışarı tıklayınca modal kapanır
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    // Gönderi detaylarını göster
+    function openEventModal(eventId) {
+        fetch(`/api/posts/${eventId}/`)
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Post bulunamadı');
+            })
+            .then(post => {
+                document.getElementById('modalTitle').textContent = post.title;
+                document.getElementById('modalCommunity').textContent = post.topluluk_name;
+                document.getElementById('modalCommunityImg').src = post.topluluk_image;
+                document.getElementById('modalDescription').textContent = post.content;
+                document.getElementById('modalImage').src = post.image || "{% static 'img/default-event.jpg' %}";
+
+                // Modalı göster
+                modal.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Hata:', error);
+            });
+    }
+</script>
+{% endblock %} 

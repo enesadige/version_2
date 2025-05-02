@@ -28,6 +28,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
@@ -36,6 +37,15 @@ body {
     line-height: 1.5;
     color: var(--text-light);
     background-color: var(--darker-bg);
+}
+
+body.auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
 }
 
 a {
@@ -461,31 +471,38 @@ input:focus, textarea:focus {
 
 .search-bar {
     display: flex;
-    margin: 0 auto;
+    background-color: var(--light-bg);
+    border-radius: var(--border-radius);
+    overflow: hidden;
     width: 100%;
     max-width: 600px;
 }
 
 .search-bar.centered {
+    margin: 0 auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    width: 60%;
+}
+
+.search-bar form {
+    display: flex;
     width: 100%;
-    max-width: 100%;
-    padding: 0 15px;
 }
 
 .search-bar input {
     flex: 1;
-    padding: 10px 15px;
+    border: none;
+    padding: 15px 20px;
+    font-size: 16px;
 }
 
 .search-bar button {
-    background-color: var(--primary-color);
-    color: white;
-    padding: 10px 15px;
-    border-radius: 0 var(--border-radius) var(--border-radius) 0;
-}
-
-.search-bar button:hover {
     background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 0 20px;
+    cursor: pointer;
 }
 
 .user-menu {
@@ -1462,16 +1479,146 @@ input:focus, textarea:focus {
     .social-media {
         justify-content: center;
     }
+}
 
-    ._alert {
-        display: flex;
-        margin: 0 auto;
-        width: 100%;
-        max-width: 600px;
-        width: 100%;
-        max-width: 100%;
-        padding: 0 15px;
-        flex: 1;
-        padding: 10px 15px;
+/* Genel Stiller */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body.auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 400px;
+}
+
+.auth-box {
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.auth-logo {
+    width: 120px;
+    margin-bottom: 20px;
+}
+
+.auth-header h2 {
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.auth-form .form-group {
+    margin-bottom: 20px;
+}
+
+.auth-form label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-size: 14px;
+}
+
+.auth-form input[type="text"],
+.auth-form input[type="email"],
+.auth-form input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.auth-form input:focus {
+    border-color: #667eea;
+    outline: none;
+}
+
+.remember-forgot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+}
+
+.remember-forgot label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0;
+}
+
+.forgot-password {
+    color: #667eea;
+    text-decoration: none;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+.auth-button {
+    width: 100%;
+    padding: 12px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.auth-button:hover {
+    background: #5a6fd6;
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    color: #666;
+}
+
+.auth-footer a {
+    color: #667eea;
+    text-decoration: none;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive Tasarım */
+@media (max-width: 480px) {
+    .auth-box {
+        padding: 20px;
+    }
+    
+    .auth-logo {
+        width: 100px;
+    }
+    
+    .auth-header h2 {
+        font-size: 20px;
     }
 } 

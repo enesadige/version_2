@@ -1,0 +1,62 @@
+[
+    {
+        "model": "topluluklar.category",
+        "pk": 1,
+        "fields": {
+            "name": "Eğlence",
+            "slug": "eglence",
+            "icon": "fas fa-gamepad",
+            "description": "Oyun, etkinlik ve eğlenceli aktiviteler"
+        }
+    },
+    {
+        "model": "topluluklar.category",
+        "pk": 2,
+        "fields": {
+            "name": "Akademik",
+            "slug": "akademik",
+            "icon": "fas fa-graduation-cap",
+            "description": "Akademik faaliyetler ve eğitim etkinlikleri"
+        }
+    },
+    {
+        "model": "topluluklar.category",
+        "pk": 3,
+        "fields": {
+            "name": "Kültür",
+            "slug": "kultur",
+            "icon": "fas fa-theater-masks",
+            "description": "Kültürel etkinlikler, tiyatro, sanat ve edebiyat"
+        }
+    },
+    {
+        "model": "topluluklar.category",
+        "pk": 4,
+        "fields": {
+            "name": "Teknoloji",
+            "slug": "teknoloji",
+            "icon": "fas fa-laptop-code",
+            "description": "Bilgisayar, yazılım, donanım ve yeni teknolojiler"
+        }
+    },
+    {
+        "model": "topluluklar.category",
+        "pk": 5,
+        "fields": {
+            "name": "Sanat",
+            "slug": "sanat",
+            "icon": "fas fa-palette",
+            "description": "Resim, müzik, fotoğrafçılık ve diğer sanat dalları"
+        }
+    },
+    {
+        "model": "topluluklar.category",
+        "pk": 6,
+        "fields": {
+            "name": "Spor",
+            "slug": "spor",
+            "icon": "fas fa-running",
+            "description": "Spor aktiviteleri, turnuvalar ve yarışmalar"
+        }
+    }
+] 

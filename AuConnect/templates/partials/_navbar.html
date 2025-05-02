@@ -1,42 +1,77 @@
 <!-- Sol Navigasyon Menüsü -->
 
 {% load static %}
+{% load profile_tags %}
 
 <nav class="side-nav">
     <div class="profile-section">
-        <div class="profile-img">
-            <img src="{% static 'img/user-icon.jpg' %}" alt="Profil">
-        </div>
-        <span class="profile-name">profil ismi</span>
+        {% if user.is_authenticated %}
+            {% url 'profile' as profile_url %}
+            <a href="{{ profile_url }}">
+                <div class="profile-img">
+                    {% get_profile_role user as user_role %}
+                    {% get_profile_image user as profile_image %}
+                    
+                    {% if user_role == 'community' and profile_image %}
+                        <img src="{{ profile_image }}" alt="Topluluk Profili">
+                    {% else %}
+                        <img src="{% static 'img/user-icon.jpg' %}" alt="Profil">
+                    {% endif %}
+                </div>
+                <span class="profile-name">{{ user.username }}</span>
+            </a>
+        {% else %}
+            <div class="profile-img">
+                <img src="{% static 'img/user-icon.jpg' %}" alt="Profil">
+            </div>
+            <span class="profile-name">Misafir</span>
+        {% endif %}
     </div>
 
     <ul class="nav-links">
-        <li><a href="{% url 'anasayfa'%}" class="active"><i class="fas fa-home"></i> Anasayfa</a></li>
-        <li><a href="{% url 'topluluklar'%}"><i class="fas fa-users"></i> Topluluklar</a></li>
-        <li><a href="{% url 'about'%}"><i class="fas fa-info-circle"></i> Hakkımızda</a></li>
+        <li><a href="{% url 'anasayfa'%}" class="{% if request.path == '/' %}active{% endif %}"><i class="fas fa-home"></i> Anasayfa</a></li>
+        <li><a href="{% url 'topluluklar'%}" class="{% if 'topluluklar' in request.path %}active{% endif %}"><i class="fas fa-users"></i> Topluluklar</a></li>
+        <li><a href="{% url 'about'%}" class="{% if 'about' in request.path %}active{% endif %}"><i class="fas fa-info-circle"></i> Hakkımızda</a></li>
     </ul>
 
     <div class="categories">
         <h3>Kategoriler</h3>
         <ul>
-            <li><a href="#"><i class="fas fa-gamepad"></i> Eğlence</a></li>
-            <li><a href="#"><i class="fas fa-graduation-cap"></i> Akademik</a></li>
-            <li><a href="#"><i class="fas fa-theater-masks"></i> Kültür</a></li>
-            <li><a href="#"><i class="fas fa-laptop-code"></i> Teknoloji</a></li>
-            <li><a href="#"><i class="fas fa-palette"></i> Sanat</a></li>
-            <li><a href="#"><i class="fas fa-running"></i> Spor</a></li>
+            {% if categories %}
+                {% for category in categories %}
+                    <li><a href="{% url 'anasayfa_posts' %}?category={{ category.slug }}"><i class="fas fa-{{ category.icon|default:'tag' }}"></i> {{ category.name }}</a></li>
+                {% endfor %}
+            {% else %}
+                <li><a href="#"><i class="fas fa-tag"></i> Henüz kategori yok</a></li>
+            {% endif %}
         </ul>
 
+        {% if user.is_authenticated %}
         <ul class="navbar-nav">
             <li class="nav-item">
-                <a href="javascript: {document.getElementById('logout').submit()}" class="nav-link">({{user.username}})
-                    Logout</a>
+                <a href="javascript: {document.getElementById('logout').submit()}" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i> Çıkış Yap
+                </a>
                 <form action="{% url 'logout' %}" method='POST' id='logout'>
-                    {%csrf_token%}
+                    {% csrf_token %}
                     <input type="hidden">
                 </form>
             </li>
         </ul>
+        {% else %}
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a href="{% url 'login' %}" class="nav-link">
+                    <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'register' %}" class="nav-link">
+                    <i class="fas fa-user-plus"></i> Kayıt Ol
+                </a>
+            </li>
+        </ul>
+        {% endif %}
     </div>
 
 </nav>
