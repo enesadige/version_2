@@ -1,0 +1,55 @@
+{% extends 'layout.html' %}
+{% load humanize %}
+{% load static %}
+
+
+{% block content %}
+<main class="main-content">
+    <header class="main-header">
+        <div class="search-bar centered">
+            <input type="text" placeholder="Topluluk ara..." id="community-search">
+            <button><i class="fas fa-search"></i></button>
+        </div>
+    </header>
+
+    <div class="content">
+
+        <div class="community-grid">
+
+
+            {% if topluluklar%}
+            {% for topluluklar in topluluklar %}
+
+            <div class="community-card" data-category="teknoloji">
+                <div class="card-header">
+                    <div class="profile-img medium">
+                        <img src="{% static topluluklar.get_image_path %}" alt="Topluluk">
+                    </div>
+                    <h3>{{ topluluklar.name }}</h3>
+                </div>
+                <div class="card-rating">
+                    <span class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </span>
+                    <span class="rating-count">(42)</span>
+                </div>
+                <p>{{ topluluklar.description }}</p>
+                <div class="card-actions">
+                    <button class="small-btn">Takip Et</button>
+                    <button class="icon-btn view-details" data-id="community1"><i
+                            class="fas fa-info-circle"></i></button>
+                </div>
+            </div>
+
+            {% endfor %}
+            {% endif %}
+
+
+        </div>
+    </div>
+</main>
+{% endblock %}

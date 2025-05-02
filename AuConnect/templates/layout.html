@@ -1,0 +1,73 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<style>
+    .message-box {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 15px 20px;
+        border-radius: 8px;
+        font-family: sans-serif;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        z-index: 9999;
+        margin-bottom: 10px;
+    }
+
+    .message-box.error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 5px;
+        right: 10px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+</style>
+
+<body>
+    {% include 'partials/_navbar.html' %}
+    <main>
+        {% if messages %}
+        <div id="djangoMessages">
+            {% for message in messages %}
+            <div class="message-box {{ message.tags }}">
+                <span class="close-btn" onclick="this.parentElement.style.display='none';">×</span>
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div class="content">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </main>
+
+
+
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+    <script src="{% static 'js/sudenaz.js' %}"></script>
+
+
+</body>
+
+</html>
