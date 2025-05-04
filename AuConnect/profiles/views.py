@@ -7,6 +7,7 @@ from .models import Follow
 from topluluklar.models import Topluluklar, Post
 from django.views.decorators.http import require_POST
 import json
+from django.contrib.auth.models import User
 
 # Profil kontrolü ve oluşturma fonksiyonu
 def get_or_create_profile(user):
@@ -151,4 +152,45 @@ def check_follow(request, topluluk_id):
     is_following = Follow.objects.filter(user=request.user, topluluk_id=topluluk_id).exists()
     
     return JsonResponse({'following': is_following})
+
+@login_required(login_url='login')
+def view_topluluk_profile(request, topluluk_name):
+    """Öğrencilerin topluluk profilini görüntülemesi için görünüm"""
+    # Topluluğu adına göre bul
+    topluluk = get_object_or_404(Topluluklar, name=topluluk_name)
+    
+    # Topluluğun kullanıcısını bul
+    community_user = get_object_or_404(User, username=topluluk_name)
+    
+    try:
+        # Topluluk profilini al
+        community_profile = community_user.profile
+        
+        # Profilin topluluk olduğunu kontrol et
+        if community_profile.role != 'community':
+            return redirect('anasayfa')
+    except ObjectDoesNotExist:
+        return redirect('anasayfa')
+    
+    # Topluluğun gönderilerini al
+    posts = Post.objects.filter(topluluk=topluluk).order_by('-created_at')
+    
+    # Takipçi sayısını hesapla
+    followers_count = Follow.objects.filter(topluluk=topluluk).count()
+    
+    # Giriş yapmış kullanıcının takip durumunu kontrol et
+    is_following = False
+    if request.user.is_authenticated and hasattr(request.user, 'profile') and request.user.profile.role == 'student':
+        is_following = Follow.objects.filter(user=request.user, topluluk=topluluk).exists()
+    
+    context = {
+        'topluluk': topluluk,
+        'community_profile': community_profile,
+        'posts': posts,
+        'followers_count': followers_count,
+        'is_following': is_following,
+        'is_viewer': False  # Görüntüleyen kullanıcı topluluk sahibi değil
+    }
+    
+    return render(request, 'Profile/view_topluluk.html', context)
 

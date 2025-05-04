@@ -43,7 +43,6 @@ def liste(request):
     }
     return render(request, "topluluklar/list.html", context)
 
-@login_required(login_url='login')
 def topluluk_detail(request, topluluk_id):
     """Topluluk detay sayfası"""
     topluluk = get_object_or_404(Topluluklar, id=topluluk_id)
@@ -54,10 +53,14 @@ def topluluk_detail(request, topluluk_id):
     if request.user.is_authenticated and hasattr(request.user, 'profile') and request.user.profile.role == 'student':
         is_following = Follow.objects.filter(user=request.user, topluluk=topluluk).exists()
     
+    # Eğer kullanıcı giriş yapmışsa takipçi sayısını göster
+    followers_count = Follow.objects.filter(topluluk=topluluk).count()
+    
     context = {
         'topluluk': topluluk,
         'posts': posts,
-        'is_following': is_following
+        'is_following': is_following,
+        'followers_count': followers_count
     }
     return render(request, 'topluluklar/detail.html', context)
 
@@ -223,12 +226,20 @@ def anasayfa_posts(request):
     
     return render(request, 'topluluklar/anasayfa_posts.html', context)
 
-@login_required(login_url='login')
 def post_api_detail(request, post_id):
     """Gönderi detaylarını JSON formatında döndüren API görünümü"""
     try:
         post = Post.objects.get(id=post_id)
         
+        # Resim adlarını doğrudan döndür
+        topluluk_image = None
+        if post.topluluk.img:
+            topluluk_image = post.topluluk.img
+            
+        post_image = None
+        if post.image:
+            post_image = post.image
+            
         # Gönderi detaylarını oluştur
         data = {
             'id': post.id,
@@ -236,8 +247,8 @@ def post_api_detail(request, post_id):
             'content': post.content,
             'topluluk_id': post.topluluk.id,
             'topluluk_name': post.topluluk.name,
-            'topluluk_image': post.topluluk.get_image_path(),
-            'image': post.get_image_path(),
+            'topluluk_image': topluluk_image,
+            'image': post_image,
             'created_at': post.created_at.strftime('%d %b %Y, %H:%M'),
             'categories': [
                 {

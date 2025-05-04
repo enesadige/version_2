@@ -8,6 +8,9 @@ from django.core.mail import send_mail
 from django.conf import settings
 import uuid
 from django.http import JsonResponse
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 def login(request):
     
@@ -55,28 +58,99 @@ def send_verification_code(request):
         if not created:
             profile.verification_code = verification_code
             profile.save()
+            
+        print(f"Doğrulama kodu oluşturuldu: {verification_code} - Email: {email}")
 
-        # Doğrulama kodunu mail olarak gönder
         try:
-            send_mail(
-                'Ankara Üniversitesi Mail Doğrulama',
-                f'Doğrulama kodunuz: {verification_code}\n\nİletişim : auconnectverify@gmail.com\nBir sorunla karşılaştığınızda bizle iletişime geçiniz...',
-                settings.EMAIL_HOST_USER,
-                [email],
-                fail_silently=False,
-            )
+            # Daha güvenli bir şekilde SMTP'yi doğrudan kullan
+            print("SMTP bağlantısı kuruluyor...")
+            
+            # SMTP sunucusuna bağlan
+            server = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
+            server.ehlo()
+            server.starttls()
+            
+            print("SMTP sunucusuna giriş yapılıyor...")
+            server.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
+            
+            # Mail hazırla
+            message = MIMEMultipart("alternative")
+            message["Subject"] = "Ankara Üniversitesi Mail Doğrulama"
+            message["From"] = settings.EMAIL_HOST_USER
+            message["To"] = email
+            
+            # Mail içeriği
+            text = f"""
+            Ankara Üniversitesi Mail Doğrulama
+            
+            Doğrulama kodunuz: {verification_code}
+            
+            İletişim: auconnectverify@gmail.com
+            Bir sorunla karşılaştığınızda bizle iletişime geçiniz...
+            """
+            
+            # MIME Part'ı oluştur
+            part = MIMEText(text, "plain")
+            message.attach(part)
+            
+            print("Mail gönderiliyor...")
+            # Maili gönder
+            server.sendmail(settings.EMAIL_HOST_USER, [email], message.as_string())
+            server.quit()
+            
+            print("Mail başarıyla gönderildi!")
             
             return JsonResponse({
                 "success": True,
                 "message": "Doğrulama kodu email adresinize gönderildi."
             })
+            
         except Exception as e:
-            # Hata durumunda hata mesajını log'a yazdır ve kullanıcıya bildir
+            # Hata durumunda hata mesajını log'a yazdır
             print(f"Email gönderme hatası: {str(e)}")
-            return JsonResponse({
-                "success": False,
-                "message": f"Email gönderilirken bir hata oluştu. Lütfen sistem yöneticisiyle iletişime geçin. Hata detayı: {str(e)}"
-            })
+            print(f"Hata türü: {type(e).__name__}")
+            print(f"EMAIL_HOST_USER: {settings.EMAIL_HOST_USER}")
+            print(f"EMAIL_HOST: {settings.EMAIL_HOST}")
+            print(f"EMAIL_PORT: {settings.EMAIL_PORT}")
+            
+            # Kendimize test maili göndermeyi dene
+            try:
+                print("Test mail gönderiliyor...")
+                
+                # Test için SMTP sunucusuna bağlan
+                test_server = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
+                test_server.ehlo()
+                test_server.starttls()
+                test_server.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
+                
+                # Test mail hazırla
+                test_message = MIMEMultipart("alternative")
+                test_message["Subject"] = "AuConnect Test Mail"
+                test_message["From"] = settings.EMAIL_HOST_USER
+                test_message["To"] = settings.EMAIL_HOST_USER
+                
+                test_text = "Bu bir test mailidir. Mail sistemi çalışıyor ancak öğrenci mailine göndermede sorun var."
+                test_part = MIMEText(test_text, "plain")
+                test_message.attach(test_part)
+                
+                # Test maili gönder
+                test_server.sendmail(settings.EMAIL_HOST_USER, [settings.EMAIL_HOST_USER], test_message.as_string())
+                test_server.quit()
+                
+                print("Test mail başarıyla gönderildi!")
+                
+                # Hata var ama doğrulama kodunu döndürelim (DEV MODU)
+                return JsonResponse({
+                    "success": True,
+                    "message": f"Şu anda mail gönderilemedi, ancak kayıt işlemine devam edebilirsiniz. Doğrulama kodunuz: {verification_code}"
+                })
+                
+            except Exception as test_e:
+                print(f"Test mail hatası: {str(test_e)}")
+                return JsonResponse({
+                    "success": False,
+                    "message": f"Email gönderilirken bir hata oluştu: {str(e)}. Test mail de başarısız oldu: {str(test_e)}"
+                })
 
     return JsonResponse({"success": False, "message": "Geçersiz istek."})
 

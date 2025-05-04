@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="tr">
 
@@ -207,6 +208,10 @@
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         z-index: 9999;
         transition: opacity 0.3s ease;
+        background-color: rgba(255, 255, 255, 0.9);
+        color: #333;
+        font-weight: bold;
+        border: 2px solid #009dff;
     }
 
     .message-box.success {
@@ -374,7 +379,7 @@
 
     <div class="content">
         <div id="roleSelectionScreen" style="display: block;">
-            <img class="logo" src="/static/img/logo.png" alt="AuConnect Logo">
+            <img class="logo" src="{% static 'img/auconnect-logo.png' %}" alt="AuConnect Logo">
             <h1 style="color: white; margin-bottom: 30px;">AuConnect'e Hoş Geldiniz</h1>
             <p style="color: white; margin-bottom: 30px;">Devam etmek için hesap türünüzü seçin:</p>
             
@@ -415,7 +420,7 @@
         </div>
 
         <div id="registerForm" style="display: none;">
-            <img class="logo" src="/static/img/logo.png" alt="AuConnect Logo">
+            <img class="logo" src="{% static 'img/auconnect-logo.png' %}" alt="AuConnect Logo">
             <form id="registerSteps" action="{% url 'register' %}" method="POST">
                 {% csrf_token %}
                 <!-- Rol bilgisini gizli input olarak ekle -->
@@ -462,8 +467,8 @@
 
     <div id="messageBox" class="message-box" style="display: none;">
         <div class="message-content">
-            <span id="messageText"></span>
-            <button id="closeMessage"><i class="fas fa-times"></i></button>
+            <span id="messageText" style="color: #333;"></span>
+            <button id="closeMessage" style="background: none; border: none; cursor: pointer; margin-left: 10px;"><i class="fas fa-times"></i></button>
         </div>
     </div>
 
@@ -498,10 +503,10 @@
             messageText.textContent = text;
             messageBox.style.display = 'block';
             
-            // 5 saniye sonra mesajı kapat
+            // 10 saniye sonra mesajı kapat (5 sn yerine)
             setTimeout(() => {
                 messageBox.style.display = 'none';
-            }, 5000);
+            }, 10000);
         }
 
         document.getElementById('closeMessage').addEventListener('click', () => {
@@ -548,7 +553,9 @@
 
         // Doğrulama kodu gönderme işlemi
         document.getElementById('sendVerificationCode').addEventListener('click', async function() {
+            console.log("Doğrulama kodu gönder butonuna tıklandı");
             const email = document.getElementById('email').value;
+            console.log("Email: " + email);
             
             if (!email.endsWith('@ogrenci.ankara.edu.tr')) {
                 showMessage('Sadece @ogrenci.ankara.edu.tr uzantılı mail adresi kabul ediliyor.');
@@ -556,7 +563,8 @@
             }
             
             try {
-                const response = await fetch('/send-verification-code/', {
+                console.log("AJAX isteği gönderiliyor");
+                const response = await fetch('/user/send-verification-code/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
@@ -565,7 +573,9 @@
                     body: `email=${encodeURIComponent(email)}`
                 });
                 
+                console.log("AJAX yanıtı alındı:", response);
                 const data = await response.json();
+                console.log("JSON veri:", data);
                 
                 if (data.success) {
                     showMessage(data.message);
@@ -575,6 +585,7 @@
                     showMessage(data.message);
                 }
             } catch (error) {
+                console.error("AJAX hatası:", error);
                 showMessage('Bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
             }
         });
@@ -588,5 +599,4 @@
         });
     </script>
 </body>
-</html>
 </html>

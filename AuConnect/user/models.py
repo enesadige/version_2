@@ -37,7 +37,10 @@ class Profile(models.Model):
     def get_image_path(self):
         if self.img:
             return self.img.url
-        return "/static/img/default-profile.png"
+        # Profil tipine göre varsayılan resim döndür
+        if self.role == 'community':
+            return "/static/img/community-icon.jpg"
+        return "/static/img/user-icon.jpg"
         
     class Meta:
         verbose_name = "Kullanıcı Profili"

@@ -2,6 +2,19 @@
 {% load static %}
 
 {% block content %}
+<style>
+    .topluluk-link {
+        color: var(--text-light);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .topluluk-link:hover {
+        color: var(--primary-color);
+        text-decoration: underline;
+    }
+</style>
+
 <main class="main-content">
     <header class="main-header">
         <div class="search-bar centered">
@@ -53,7 +66,7 @@
                                                 <img src="{% static post.topluluk.get_image_path %}" alt="{{ post.topluluk.name }}">
                                             </div>
                                             <div class="author-info">
-                                                <h3>{{ post.topluluk.name }}</h3>
+                                                <h3><a href="{% url 'view_topluluk_profile' post.topluluk.name %}" class="topluluk-link" onclick="event.stopPropagation();">{{ post.topluluk.name }}</a></h3>
                                                 <p>{{ post.created_at|date:"d M Y, H:i" }}</p>
                                             </div>
                                         </div>
@@ -116,7 +129,7 @@
                 </div>
                 <div class="event-detail-title">
                     <h2 id="modalTitle"></h2>
-                    <p id="modalCommunity"></p>
+                    <p><a id="modalCommunityLink" href="#" class="topluluk-link" onclick="event.stopPropagation();"><span id="modalCommunity"></span></a></p>
                 </div>
             </div>
             <div class="event-detail-image">
@@ -137,7 +150,12 @@
 
     // Gönderi kartlarına tıklama işlevselliği
     postCards.forEach(card => {
-        card.addEventListener('click', () => {
+        card.addEventListener('click', (e) => {
+            // Eğer tıklanan element veya üst elementi bir link ise, gönderi modalını açma
+            if (e.target.closest('a')) {
+                return;
+            }
+            
             const eventId = card.getAttribute('data-event-id');
             if (eventId) {
                 openEventModal(eventId);
@@ -159,7 +177,8 @@
 
     // Gönderi detaylarını göster
     function openEventModal(eventId) {
-        fetch(`/api/posts/${eventId}/`)
+        console.log("Gönderi ID:", eventId);
+        fetch(`/topluluklar/api/posts/${eventId}/`)
             .then(response => {
                 if (response.ok) {
                     return response.json();
@@ -167,11 +186,32 @@
                 throw new Error('Post bulunamadı');
             })
             .then(post => {
+                console.log("API Yanıtı:", post);
+                
                 document.getElementById('modalTitle').textContent = post.title;
                 document.getElementById('modalCommunity').textContent = post.topluluk_name;
-                document.getElementById('modalCommunityImg').src = post.topluluk_image;
+                
+                // Topluluk profil linki oluştur
+                const communityLink = `/profiller/topluluklar/${post.topluluk_name}/`;
+                console.log("Topluluk link:", communityLink);
+                document.getElementById('modalCommunityLink').setAttribute('href', communityLink);
+                
+                // Topluluk resmi kontrolü
+                if (post.topluluk_image) {
+                    document.getElementById('modalCommunityImg').src = `{% static 'img/' %}${post.topluluk_image}`;
+                } else {
+                    document.getElementById('modalCommunityImg').src = "{% static 'img/community-icon.jpg' %}";
+                }
+                
                 document.getElementById('modalDescription').textContent = post.content;
-                document.getElementById('modalImage').src = post.image || "{% static 'img/default-event.jpg' %}";
+                
+                // Gönderi resmi kontrolü
+                if (post.image) {
+                    document.getElementById('modalImage').src = `{% static 'img/' %}${post.image}`;
+                    document.getElementById('modalImage').style.display = 'block';
+                } else {
+                    document.getElementById('modalImage').style.display = 'none';
+                }
 
                 // Modalı göster
                 modal.style.display = 'block';

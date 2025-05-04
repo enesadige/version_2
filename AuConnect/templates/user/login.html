@@ -160,6 +160,10 @@
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         z-index: 9999;
         margin-bottom: 10px;
+        background-color: rgba(255, 255, 255, 0.9);
+        color: #333;
+        font-weight: bold;
+        border: 2px solid #009dff;
     }
 
     .message-box.error {
@@ -168,12 +172,25 @@
         border: 1px solid #f5c6cb;
     }
 
+    .message-box.success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .message-box.warning {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+    }
+
     .close-btn {
         position: absolute;
         top: 5px;
         right: 10px;
         font-weight: bold;
         cursor: pointer;
+        color: #333;
     }
 </style>
 
@@ -227,6 +244,17 @@
             s.style.animationDelay = Math.random() * 5 + 's';
             squares.appendChild(s);
         }
+
+        // Mesaj kutuları için otomatik kapanma süresi
+        document.addEventListener('DOMContentLoaded', function() {
+            const messageBoxes = document.querySelectorAll('.message-box');
+            messageBoxes.forEach(box => {
+                // 10 saniye sonra mesajı otomatik kapat
+                setTimeout(() => {
+                    box.style.display = 'none';
+                }, 10000);
+            });
+        });
     </script>
 </body>
 

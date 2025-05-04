@@ -1,0 +1,505 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  .profile-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 30px;
+    margin-bottom: 40px;
+    background-color: var(--dark-bg);
+    border-radius: var(--border-radius);
+    padding: 20px;
+  }
+
+  .profile-img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+
+  .profile-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .profile-info {
+    flex: 1;
+  }
+
+  .profile-name {
+    font-size: 24px;
+    color: var(--text-light);
+    margin-bottom: 5px;
+  }
+
+  .profile-stats {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+  }
+
+  .profile-stats span {
+    color: var(--text-muted);
+    font-size: 15px;
+  }
+
+  .profile-description {
+    color: var(--text-muted);
+    line-height: 1.5;
+    font-size: 15px;
+  }
+
+  .follow-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    background-color: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .follow-btn.following {
+    background-color: transparent;
+    border: 1px solid var(--text-muted);
+    color: var(--text-light);
+  }
+  
+  .follow-btn:hover {
+    background-color: var(--accent-color);
+  }
+  
+  .follow-btn.following:hover {
+    background-color: rgba(255, 0, 0, 0.1);
+    border-color: #ff5252;
+    color: #ff5252;
+  }
+
+  .section-title {
+    font-size: 20px;
+    color: var(--text-light);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title i {
+    color: var(--accent-color);
+    font-size: 18px;
+  }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+
+  .gallery-section {
+    margin-top: 40px;
+  }
+
+  .gallery-item {
+    height: 250px;
+    overflow: hidden;
+    border-radius: var(--border-radius);
+    background-color: var(--dark-bg);
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .gallery-item:hover {
+    transform: translateY(-5px);
+  }
+
+  .gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .gallery-item-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 15px;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0));
+    color: white;
+  }
+
+  .gallery-item-title {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 5px;
+  }
+
+  .gallery-item-date {
+    font-size: 12px;
+    opacity: 0.8;
+  }
+
+  /* Modal Stilleri */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(5px);
+  }
+
+  .modal-content {
+    background-color: var(--dark-bg);
+    margin: 5% auto;
+    padding: 20px;
+    border-radius: var(--border-radius);
+    width: 80%;
+    max-width: 700px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+    position: relative;
+  }
+
+  .close-modal {
+    color: var(--text-muted);
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    position: absolute;
+    right: 15px;
+    top: 10px;
+  }
+
+  .close-modal:hover {
+    color: var(--text-light);
+  }
+
+  .event-detail {
+    margin-top: 15px;
+  }
+
+  .event-detail-header {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .event-detail-title h2 {
+    font-size: 24px;
+    color: var(--text-light);
+    margin-bottom: 5px;
+  }
+
+  .event-detail-title p {
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  .event-detail-image {
+    width: 100%;
+    max-height: 350px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    border-radius: var(--border-radius);
+    background-color: var(--light-bg);
+  }
+
+  .event-detail-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .event-detail-description {
+    color: var(--text-light);
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  .modal-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 15px;
+  }
+
+  .category-tag {
+    background-color: var(--light-bg);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .empty-message {
+    text-align: center;
+    padding: 50px 0;
+    color: var(--text-muted);
+  }
+</style>
+
+<main class="main-content">
+  <div class="content">
+    <div class="profile-header">
+      <div class="profile-img">
+        <img src="{% static topluluk.get_image_path %}" alt="{{ topluluk.name }}">
+      </div>
+      <div class="profile-info">
+        <h2 class="profile-name">{{ topluluk.name }}</h2>
+        <div class="profile-stats">
+          <span>{{ followers_count }} Takipçi</span>
+        </div>
+        <p class="profile-description">{{ topluluk.description }}</p>
+        
+        {% if user.is_authenticated and user.profile.role == "student" %}
+          <button class="follow-btn {% if is_following %}following{% endif %}" data-topluluk="{{ topluluk.id }}" data-action="{% if is_following %}unfollow{% else %}follow{% endif %}">
+            {% if is_following %}
+              <i class="fas fa-user-minus"></i> Takibi Bırak
+            {% else %}
+              <i class="fas fa-user-plus"></i> Takip Et
+            {% endif %}
+          </button>
+        {% endif %}
+      </div>
+    </div>
+    
+    <div class="gallery-section">
+      <h3 class="section-title">
+        <i class="fas fa-image"></i> Gönderiler
+      </h3>
+      
+      {% if posts %}
+        <div class="gallery-grid">
+          {% for post in posts %}
+            <div class="gallery-item" data-post-id="{{ post.id }}">
+              {% if post.image %}
+                <img src="{% static post.get_image_path %}" alt="{{ post.title }}">
+              {% else %}
+                <div style="background-color: var(--light-bg); height: 100%; display: flex; align-items: center; justify-content: center;">
+                  <i class="fas fa-file-alt" style="font-size: 48px; color: var(--text-muted);"></i>
+                </div>
+              {% endif %}
+              <div class="gallery-item-info">
+                <div class="gallery-item-title">{{ post.title }}</div>
+                <div class="gallery-item-date">{{ post.created_at|date:"d M Y, H:i" }}</div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-message">
+          <i class="fas fa-info-circle"></i>
+          <p>Bu topluluk henüz gönderi paylaşmamış.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</main>
+
+<!-- Gönderi Detay Modal -->
+<div id="postDetailModal" class="modal">
+  <div class="modal-content">
+    <span class="close-modal">&times;</span>
+    <div class="event-detail">
+      <div class="event-detail-header">
+        <div class="profile-img medium">
+          <img id="modalCommunityImg" src="{% static 'img/community-icon.jpg' %}" alt="Topluluk">
+        </div>
+        <div class="event-detail-title">
+          <h2 id="modalTitle"></h2>
+          <p id="modalDate"></p>
+        </div>
+      </div>
+      <div class="event-detail-image">
+        <img id="modalImage" src="" alt="Gönderi Görseli">
+      </div>
+      <div class="event-detail-description">
+        <p id="modalDescription"></p>
+      </div>
+      <div class="modal-categories" id="modalCategories">
+        <!-- Kategoriler buraya gelecek -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Modal işlevselliği
+  document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('postDetailModal');
+    const postItems = document.querySelectorAll('.gallery-item');
+    const closeModal = modal.querySelector('.close-modal');
+    
+    // Gönderi kartlarına tıklama işlevselliği
+    postItems.forEach(item => {
+      item.addEventListener('click', function() {
+        const postId = this.getAttribute('data-post-id');
+        if (postId) {
+          openPostModal(postId);
+        }
+      });
+    });
+    
+    // Modal kapatma
+    closeModal.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+    
+    // Dışarı tıklayınca modal kapanır
+    window.addEventListener('click', (event) => {
+      if (event.target === modal) {
+        modal.style.display = 'none';
+      }
+    });
+    
+    // Gönderi detaylarını göster
+    function openPostModal(postId) {
+      fetch(`/topluluklar/api/posts/${postId}/`)
+        .then(response => {
+          if (response.ok) {
+            return response.json();
+          }
+          throw new Error('Post bulunamadı');
+        })
+        .then(post => {
+          document.getElementById('modalTitle').textContent = post.title;
+          document.getElementById('modalDate').textContent = post.created_at;
+          
+          // Topluluk resmi kontrolü
+          if (post.topluluk_image) {
+            document.getElementById('modalCommunityImg').src = `{% static 'img/' %}${post.topluluk_image}`;
+          } else {
+            document.getElementById('modalCommunityImg').src = "{% static 'img/community-icon.jpg' %}";
+          }
+          
+          document.getElementById('modalDescription').textContent = post.content;
+          
+          // Gönderi resmi kontrolü
+          if (post.image) {
+            document.getElementById('modalImage').src = `{% static 'img/' %}${post.image}`;
+            document.getElementById('modalImage').style.display = 'block';
+          } else {
+            document.getElementById('modalImage').style.display = 'none';
+          }
+          
+          // Kategorileri ekle
+          const categoriesContainer = document.getElementById('modalCategories');
+          categoriesContainer.innerHTML = '';
+          
+          if (post.categories && post.categories.length > 0) {
+            post.categories.forEach(category => {
+              const categoryTag = document.createElement('span');
+              categoryTag.className = 'category-tag';
+              
+              if (category.icon) {
+                const icon = document.createElement('i');
+                icon.className = `fas fa-${category.icon}`;
+                categoryTag.appendChild(icon);
+              }
+              
+              categoryTag.appendChild(document.createTextNode(' ' + category.name));
+              categoriesContainer.appendChild(categoryTag);
+            });
+          }
+          
+          // Modalı göster
+          modal.style.display = 'block';
+        })
+        .catch(error => {
+          console.error('Hata:', error);
+        });
+    }
+    
+    // Takip butonu işlevselliği
+    const followBtn = document.querySelector('.follow-btn');
+    
+    if (followBtn) {
+      followBtn.addEventListener('click', function() {
+        const toplulukId = this.getAttribute('data-topluluk');
+        const action = this.getAttribute('data-action');
+        
+        // Form verilerini oluştur
+        const formData = new FormData();
+        formData.append('topluluk_id', toplulukId);
+        formData.append('action', action);
+        formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+        
+        // AJAX isteği gönder
+        fetch('/profiller/api/toggle-follow/', {
+          method: 'POST',
+          body: formData,
+          credentials: 'same-origin',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            // Butonun görünümünü güncelle
+            if (action === 'follow') {
+              this.setAttribute('data-action', 'unfollow');
+              this.classList.add('following');
+              this.innerHTML = '<i class="fas fa-user-minus"></i> Takibi Bırak';
+            } else {
+              this.setAttribute('data-action', 'follow');
+              this.classList.remove('following');
+              this.innerHTML = '<i class="fas fa-user-plus"></i> Takip Et';
+            }
+            
+            // Takipçi sayısını güncelle
+            const followersCount = document.querySelector('.profile-stats span');
+            if (followersCount) {
+              const currentCount = parseInt(followersCount.textContent.split(' ')[0]);
+              const newCount = action === 'follow' ? currentCount + 1 : currentCount - 1;
+              followersCount.textContent = `${newCount} Takipçi`;
+            }
+          } else {
+            console.error('Bir hata oluştu:', data.message);
+            alert('Bir hata oluştu: ' + data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Hata:', error);
+          alert('İşlem sırasında bir hata oluştu.');
+        });
+      });
+    }
+  });
+  
+  // CSRF token alımı için yardımcı fonksiyon
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+</script>
+{% endblock %} 

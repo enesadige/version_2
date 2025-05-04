@@ -327,7 +327,14 @@
     <!-- Profil Bilgileri -->
     <div class="profile-header">
       <div class="profile-img">
-        <img src="{% static profile.get_image_path %}" alt="Profil resmi">
+        {% load profile_tags %}
+        {% get_topluluk_image user as topluluk_image %}
+        
+        {% if topluluk_image %}
+          <img src="{% static topluluk_image %}" alt="Profil resmi">
+        {% else %}
+          <img src="{% static 'img/community-icon.jpg' %}" alt="Profil resmi">
+        {% endif %}
       </div>
       <div class="profile-info">
         <h1 class="profile-name">{{ user.username }}</h1>

@@ -475,14 +475,14 @@ input:focus, textarea:focus {
     border-radius: var(--border-radius);
     overflow: hidden;
     width: 100%;
-    max-width: 600px;
+    max-width: 2000px;
 }
 
 .search-bar.centered {
     margin: 0 auto;
     margin-top: 20px;
     margin-bottom: 20px;
-    width: 60%;
+    width: 100%;
 }
 
 .search-bar form {
@@ -498,7 +498,7 @@ input:focus, textarea:focus {
 }
 
 .search-bar button {
-    background-color: var(--accent-color);
+    background-color: #004d99;
     color: white;
     border: none;
     padding: 0 20px;
@@ -1161,15 +1161,35 @@ input:focus, textarea:focus {
 .post-card {
     background-color: var(--dark-bg);
     border-radius: var(--border-radius);
-    border: 1px solid var(--border-color);
     overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: var(--box-shadow);
+    transition: all 0.3s ease;
     cursor: pointer;
-    transition: var(--transition);
+    position: relative;
+}
+
+.post-card:after {
+    content: "\f06e"; /* göz ikonu */
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    color: var(--accent-color);
+    font-size: 18px;
+    opacity: 0.7;
+    transition: all 0.3s ease;
 }
 
 .post-card:hover {
     transform: translateY(-5px);
-    box-shadow: var(--box-shadow);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.post-card:hover:after {
+    opacity: 1;
+    transform: scale(1.2);
 }
 
 .post-header {
@@ -1257,7 +1277,7 @@ input:focus, textarea:focus {
     background-color: transparent;
 }
 
-/* Etkinlik Detay Modal */
+/* Gönderi Detay Modal */
 .event-detail {
     padding: 20px;
 }
@@ -1276,6 +1296,7 @@ input:focus, textarea:focus {
     font-size: 22px;
     font-weight: 600;
     margin-bottom: 5px;
+    color: var(--accent-color);
 }
 
 .event-detail-title p {
@@ -1289,12 +1310,18 @@ input:focus, textarea:focus {
     border-radius: var(--border-radius);
     overflow: hidden;
     margin-bottom: 20px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
 
 .event-detail-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.event-detail-image img:hover {
+    transform: scale(1.03);
 }
 
 .event-detail-info {
@@ -1302,11 +1329,14 @@ input:focus, textarea:focus {
     padding: 15px;
     background-color: var(--light-bg);
     border-radius: var(--border-radius);
+    border-left: 3px solid var(--accent-color);
 }
 
 .event-detail-info p {
     margin-bottom: 10px;
     font-size: 15px;
+    display: flex;
+    align-items: center;
 }
 
 .event-detail-info p:last-child {
@@ -1317,6 +1347,37 @@ input:focus, textarea:focus {
     width: 25px;
     text-align: center;
     color: var(--accent-color);
+    margin-right: 8px;
+}
+
+/* Modal içindeki kategoriler için stil */
+.event-detail-info .post-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.event-detail-info .category-tag {
+    background-color: var(--dark-bg);
+    color: var(--text-light);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.event-detail-info .category-tag i {
+    margin-right: 5px;
+    width: auto;
+}
+
+.event-detail-info .category-tag:hover {
+    background-color: var(--accent-color);
+    color: white;
+    transform: translateY(-2px);
 }
 
 .event-detail-description {
@@ -1327,16 +1388,15 @@ input:focus, textarea:focus {
     font-size: 18px;
     font-weight: 600;
     margin-bottom: 10px;
+    color: var(--accent-color);
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .event-detail-description p {
     line-height: 1.6;
     color: var(--text-light);
-}
-
-.event-detail-actions {
-    display: flex;
-    gap: 10px;
+    font-size: 15px;
 }
 
 /* Takip Butonu Stilleri */

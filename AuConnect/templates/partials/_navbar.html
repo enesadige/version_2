@@ -11,9 +11,14 @@
                 <div class="profile-img">
                     {% get_profile_role user as user_role %}
                     {% get_profile_image user as profile_image %}
+                    {% get_topluluk_image user as topluluk_image %}
                     
-                    {% if user_role == 'community' and profile_image %}
-                        <img src="{{ profile_image }}" alt="Topluluk Profili">
+                    {% if user_role == 'community' %}
+                        {% if topluluk_image %}
+                            <img src="{% static topluluk_image %}" alt="Topluluk Profili">
+                        {% else %}
+                            <img src="{% static 'img/community-icon.jpg' %}" alt="Topluluk Profili">
+                        {% endif %}
                     {% else %}
                         <img src="{% static 'img/user-icon.jpg' %}" alt="Profil">
                     {% endif %}

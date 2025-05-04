@@ -81,7 +81,7 @@
                                     <div class="empty-message">
                                         <i class="fas fa-info-circle"></i>
                                         <p>Henüz takip ettiğiniz toplulukların gönderisi bulunmamaktadır.</p>
-                                        <a href="{% url 'topluluklar' %}" class="btn btn-primary">Toplulukları Keşfedin</a>
+                                        <a href="{% url 'topluluklar' %}" class="btn btn-primary" style = "background-color: #004d99;">Toplulukları Keşfedin</a>
                                     </div>
                                 </div>
                             </div>
@@ -149,7 +149,7 @@
     </div>
 </main>
     
-    <!-- Etkinlik Detay Modal -->
+    <!-- Gönderi Detay Modal -->
     <div id="eventModal" class="modal">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
@@ -164,19 +164,15 @@
                     </div>
                 </div>
                 <div class="event-detail-image">
-                    <img id="modalImage" src="" alt="Etkinlik Görseli">
+                    <img id="modalImage" src="" alt="Gönderi Görseli">
                 </div>
                 <div class="event-detail-info">
                     <p><i class="fas fa-calendar-day"></i> <span id="modalDate"></span></p>
-                    <p><i class="fas fa-map-marker-alt"></i> <span id="modalLocation"></span></p>
-                    <p><i class="fas fa-clock"></i> <span id="modalTime"></span></p>
+                    <div id="modalCategories" class="post-categories" style="margin-top: 10px;"></div>
                 </div>
                 <div class="event-detail-description">
-                    <h3>Etkinlik Açıklaması</h3>
-                    <p id="modalDescription">
-                        Bu etkinlik hakkında detaylı bilgi yakında eklenecektir. Etkinlik ile ilgili güncellemeler için
-                        topluluğun sayfasını takip edebilirsiniz.
-                    </p>
+                    <h3>Gönderi İçeriği</h3>
+                    <p id="modalDescription"></p>
                 </div>
             </div>
         </div>
@@ -201,14 +197,20 @@
         });
 
         // Etkinlik Modal İşlevselliği
+        console.log("Modal script çalışıyor...");
         const modal = document.getElementById('eventModal');
+        console.log("Modal element:", modal);
         const postCards = document.querySelectorAll('.post-card');
+        console.log("Post kartları:", postCards.length);
         const closeModal = document.querySelector('.close-modal');
+        console.log("Close modal butonu:", closeModal);
 
         // Etkinlik kartlarına tıklama işlevselliği ekle
         postCards.forEach(card => {
             card.addEventListener('click', () => {
+                console.log("Karta tıklandı");
                 const eventId = card.getAttribute('data-event-id');
+                console.log("Event ID:", eventId);
                 if (eventId) {
                     openEventModal(eventId);
                 }
@@ -218,38 +220,107 @@
         // Modal kapatma
         closeModal.addEventListener('click', () => {
             modal.style.display = 'none';
+            console.log("Modal kapatıldı");
         });
 
         // Dışarı tıklayınca modal kapanır
         window.addEventListener('click', (event) => {
             if (event.target === modal) {
                 modal.style.display = 'none';
+                console.log("Modal dışa tıklanarak kapatıldı");
             }
         });
 
-        // Etkinlik detaylarını göster
+        // Gönderi detaylarını göster
         function openEventModal(eventId) {
+            console.log("openEventModal fonksiyonu çağrıldı, eventId:", eventId);
+            
+            // Modal'ı önce göster, sonra içeriği yükle (kullanıcı için daha iyi bir deneyim)
+            modal.style.display = 'block';
+            
+            // Bir yükleniyor mesajı göster
+            document.getElementById('modalTitle').textContent = "Gönderi yükleniyor...";
+            document.getElementById('modalDescription').textContent = "Lütfen bekleyin...";
+            document.querySelector('.event-detail-image').style.display = 'none';
+            
             // Gerçek post verilerini göster
-            fetch(`/api/posts/${eventId}/`)
+            let apiURL = `/topluluklar/api/posts/${eventId}/`;
+            console.log("API URL:", apiURL);
+            
+            fetch(apiURL)
                 .then(response => {
-                    if (response.ok) {
-                        return response.json();
+                    console.log("API yanıtı:", response);
+                    if (!response.ok) {
+                        if (response.status === 404) {
+                            throw new Error('Gönderi bulunamadı');
+                        } else if (response.status === 403) {
+                            throw new Error('Bu gönderiyi görüntüleme yetkiniz yok');
+                        } else {
+                            throw new Error('Sunucu hatası: ' + response.status);
+                        }
                     }
-                    throw new Error('Post bulunamadı');
+                    return response.json();
                 })
                 .then(post => {
+                    console.log("API'den alınan post verisi:", post);
+                    
+                    if (post.error) {
+                        throw new Error(post.error);
+                    }
+                    
                     document.getElementById('modalTitle').textContent = post.title;
                     document.getElementById('modalCommunity').textContent = post.topluluk_name;
-                    document.getElementById('modalCommunityImg').src = post.topluluk_image;
+                    
+                    // Statik URL'yi oluştur
+                    const staticImgPath = "{% static 'img/" + "PATH_PLACEHOLDER" + "' %}".replace("PATH_PLACEHOLDER", "");
+                    const staticBase = staticImgPath.replace(/img\/$/, "");
+                    
+                    // Topluluk resmini göster
+                    if (post.topluluk_image) {
+                        // Resim yolundan sadece dosya adını çıkar
+                        const topluluklarImgFile = post.topluluk_image.split('/').pop();
+                        document.getElementById('modalCommunityImg').src = "{% static 'img/' %}" + topluluklarImgFile;
+                    } else {
+                        document.getElementById('modalCommunityImg').src = "{% static 'img/community-icon.jpg' %}";
+                    }
+                    
                     document.getElementById('modalDate').textContent = post.created_at;
-                    document.getElementById('modalImage').src = post.image || "{% static 'img/default-event.jpg' %}";
+                    
+                    // Resmi göster (eğer varsa)
+                    if (post.image) {
+                        // Resim yolundan sadece dosya adını çıkar
+                        const imgFile = post.image.split('/').pop();
+                        document.getElementById('modalImage').src = "{% static 'img/' %}" + imgFile;
+                        document.querySelector('.event-detail-image').style.display = 'block';
+                    } else {
+                        document.querySelector('.event-detail-image').style.display = 'none';
+                    }
+                    
+                    // İçeriği göster
                     document.getElementById('modalDescription').textContent = post.content;
+                    
+                    // Kategorileri ekle
+                    const categoriesContainer = document.getElementById('modalCategories');
+                    categoriesContainer.innerHTML = '';
+                    
+                    if (post.categories && post.categories.length > 0) {
+                        post.categories.forEach(category => {
+                            const categoryTag = document.createElement('span');
+                            categoryTag.classList.add('category-tag');
+                            categoryTag.innerHTML = `${category.icon ? `<i class="fas fa-${category.icon}"></i>` : ''} ${category.name}`;
+                            categoriesContainer.appendChild(categoryTag);
+                        });
+                    }
 
-                    // Modalı göster
-                    modal.style.display = 'block';
+                    console.log("Modal içeriği güncellendi");
                 })
                 .catch(error => {
                     console.error('Hata:', error);
+                    // Hata durumunda kullanıcıya bildir
+                    document.getElementById('modalTitle').textContent = "Hata";
+                    document.getElementById('modalDescription').textContent = "Gönderi yüklenirken bir hata oluştu: " + error.message;
+                    document.querySelector('.event-detail-image').style.display = 'none';
+                    document.getElementById('modalCategories').innerHTML = '';
                 });
         }
     </script>

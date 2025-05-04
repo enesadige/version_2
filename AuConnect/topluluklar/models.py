@@ -13,10 +13,16 @@ class Topluluklar(models.Model):
     def __str__(self):
         return self.name
 
-
     def get_image_path(self):
         return "/img/" + str(self.img)
     
+    def get_user(self):
+        """Topluluk adıyla eşleşen kullanıcıyı döndürür."""
+        try:
+            return User.objects.get(username=self.name)
+        except User.DoesNotExist:
+            return None
+
 # Kategori modeli
 class Category(models.Model):
     name = models.CharField(max_length=50, unique=True)

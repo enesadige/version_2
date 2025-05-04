@@ -139,13 +139,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Mail gönderici ayarları
 # Her durumda gerçek mail gönder:
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Gerçek SMTP gönderimi
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'AuConnectVerify@gmail.com'        # Gönderen adres
 EMAIL_HOST_PASSWORD = 'jokb jrdn tqik oind'          # Gmail'de oluşturduğun "uygulama şifresi"
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_TIMEOUT = 30  # 30 saniye timeout
 
 # Alternatif olarak, aşağıdaki conditional kısmı yorum satırına alabilirsin
 """
