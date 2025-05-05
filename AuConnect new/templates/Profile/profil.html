@@ -1,0 +1,56 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block content %}
+    {% include 'partials/_navbar.html' %}
+    <main class="main-content">
+        <!-- Profil Bilgileri -->
+        <div class="profile-header">
+            <div class="profile-img">
+                <img src="{% static profile.get_image_path %}" alt="Profil resmi">
+            </div>
+            <div class="profile-info">
+                <h1 class="profile-name">{{ user.username }}</h1>
+                <div class="profile-stats">
+                    <span>{{ followers_count }} takipçi</span>
+                    <a href="{% url 'create_post' %}" class="add-post-btn">
+                        <i class="fa-solid fa-plus"></i> Gönderi Ekle
+                    </a>
+                </div>
+                <p class="profile-description">{{ profile.description }}</p>
+            </div>
+        </div>
+        <div class="gallery-section">
+            <h2 class="section-title">Gönderiler</h2>
+            {% if topluluk %}
+                {% with posts=topluluk.posts.all %}
+                    {% if posts %}
+                        <div class="gallery-grid">
+                            {% for post in posts %}
+                                <div class="gallery-item">
+                                    <a href="{% url 'topluluk_detail' topluluk.id %}">
+                                        {% if post.image %}
+                                            <img src="{% static post.get_image_path %}" alt="{{ post.title }}">
+                                        {% else %}
+                                            <div style="display:flex; align-items:center; justify-content:center; width:100%; height:100%; color:var(--text-muted); text-align:center; padding:10px; background-color:var(--light-bg);">
+                                                <span>{{ post.title }}</span>
+                                            </div>
+                                        {% endif %}
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <p>Henüz hiç gönderi bulunmamaktadır. Gönderi eklemek için "Gönderi Ekle" butonuna tıklayabilirsiniz.</p>
+                        </div>
+                    {% endif %}
+                {% endwith %}
+            {% else %}
+                <div class="alert alert-warning">
+                    <p>Topluluk bilgisi bulunamadı. Lütfen site yöneticisiyle iletişime geçin.</p>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+{% endblock %}
