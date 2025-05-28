@@ -1,1 +1,0 @@
-        return "/img/" + self.image

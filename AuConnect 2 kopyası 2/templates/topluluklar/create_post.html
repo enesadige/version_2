@@ -1,0 +1,167 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .page-title {
+        font-size: 24px;
+        color: var(--text-light);
+        margin-bottom: 20px;
+    }
+    
+    .post-form-container {
+        background-color: var(--dark-bg);
+        border-radius: var(--border-radius);
+        padding: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 15px;
+        color: var(--text-light);
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px;
+        background-color: var(--light-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        color: var(--text-light);
+        font-size: 15px;
+    }
+    
+    .form-control:focus {
+        border-color: var(--accent-color);
+        outline: none;
+    }
+    
+    textarea.form-control {
+        min-height: 150px;
+        resize: vertical;
+    }
+    
+    .form-text {
+        display: block;
+        color: var(--text-muted);
+        font-size: 12px;
+        margin-top: 5px;
+    }
+    
+    .categories-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 10px;
+    }
+    
+    .category-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px;
+        background-color: var(--light-bg);
+        border-radius: var(--border-radius);
+    }
+    
+    .category-checkbox input {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .category-checkbox label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: var(--text-light);
+        cursor: pointer;
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+    
+    .cancel-btn {
+        padding: 12px 20px;
+        background-color: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-light);
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    
+    .cancel-btn:hover {
+        background-color: var(--light-bg);
+    }
+    
+    .submit-btn {
+        padding: 12px 25px;
+        background-color: var(--accent-color);
+        border: none;
+        color: white;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    
+    .submit-btn:hover {
+        background-color: #00b0b9;
+    }
+</style>
+
+<main class="main-content">
+    <div class="content">
+        <h1 class="page-title">Yeni Gönderi Oluştur</h1>
+        
+        <div class="post-form-container">
+            <form method="post" action="{% url 'create_post' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="title" class="form-label">Başlık</label>
+                    <input type="text" class="form-control" id="title" name="title" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="content" class="form-label">İçerik</label>
+                    <textarea class="form-control" id="content" name="content" rows="5" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="image" class="form-label">Gönderi Resmi</label>
+                    <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                    <small class="form-text">PNG, JPG veya JPEG formatında bir resim seçin.</small>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Kategoriler</label>
+                    <div class="categories-container">
+                        {% for category in categories %}
+                        <div class="category-checkbox">
+                            <input type="checkbox" name="categories" value="{{ category.id }}" id="category-{{ category.id }}">
+                            <label for="category-{{ category.id }}">
+                                {% if category.icon %}<i class="fas fa-{{ category.icon }}" style="color: var(--accent-color); font-size: 16px; width: 20px; text-align: center;"></i>{% endif %}
+                                {{ category.name }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <small class="form-text">En az bir kategori seçmeniz tavsiye edilir.</small>
+                </div>
+                
+                <div class="form-actions">
+                    <a href="{% url 'profil' %}" class="cancel-btn">İptal</a>
+                    <button type="submit" class="submit-btn">Gönderiyi Yayınla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+{% endblock %} 

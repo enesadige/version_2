@@ -1,0 +1,311 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block content %}
+    {% include 'partials/_navbar.html' %}
+    <main class="main-content">
+        <!-- Profil Bilgileri -->
+        <div class="profile-header">
+            <div class="profile-img">
+                <img src="{% static topluluk.get_image_path %}" alt="Profil resmi">
+            </div>
+            <div class="profile-info">
+                <h1 class="profile-name">{{ user.username }}</h1>
+                <span class="profile-followers">{{ followers_count }} takipçi</span>
+            </div>
+            <div class="profile-stats">
+                <a href="{% url 'create_post' %}" class="add-post-btn">
+                    <i class="fa-solid fa-plus"></i> Gönderi Ekle
+                </a>
+                <button id="change-password-btn" class="button">Şifremi Güncelle</button>
+            </div>
+            <p class="profile-description">{{ profile.description }}</p>
+        </div>
+
+        <!-- Şifre Güncelle Modalı -->
+        <div id="change-password-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Şifreyi Güncelle</h2>
+                    <span class="close-modal">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form id="change-password-form">
+                        <div class="form-group">
+                            <label for="current-password">Mevcut Şifre</label>
+                            <input type="password" id="current-password" name="current_password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-password">Yeni Şifre</label>
+                            <input type="password" id="new-password" name="new_password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-password2">Yeni Şifre (Tekrar)</label>
+                            <input type="password" id="new-password2" name="new_password2" required>
+                        </div>
+                        <button type="submit" class="button" style="width: 100%; margin-top: 10px; background-color: #2B5BA9; color: white; font-size: 16px;">Şifreyi Güncelle</button>
+                    </form>
+                    <div id="change-password-message" style="margin-top: 15px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('change-password-modal');
+            const openBtn = document.getElementById('change-password-btn');
+            const closeBtn = document.querySelector('#change-password-modal .close-modal');
+            const form = document.getElementById('change-password-form');
+            const messageBox = document.getElementById('change-password-message');
+
+            openBtn.onclick = function(e) {
+                e.preventDefault();
+                modal.style.display = 'block';
+                messageBox.textContent = '';
+                form.reset();
+            };
+            closeBtn.onclick = function() {
+                modal.style.display = 'none';
+            };
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            };
+
+            form.onsubmit = function(e) {
+                e.preventDefault();
+                messageBox.textContent = '';
+                const current_password = document.getElementById('current-password').value.trim();
+                const new_password = document.getElementById('new-password').value.trim();
+                const new_password2 = document.getElementById('new-password2').value.trim();
+                if (!current_password || !new_password || !new_password2) {
+                    messageBox.textContent = 'Tüm alanları doldurunuz.';
+                    return;
+                }
+                if (new_password !== new_password2) {
+                    messageBox.textContent = 'Yeni şifreler eşleşmiyor.';
+                    return;
+                }
+                fetch('/user/api/change-password/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify({current_password, new_password})
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        messageBox.style.color = '#4CAF50';
+                        messageBox.textContent = data.message;
+                        setTimeout(() => { modal.style.display = 'none'; }, 2000);
+                    } else {
+                        messageBox.style.color = '#F44336';
+                        messageBox.textContent = data.message;
+                    }
+                })
+                .catch(() => {
+                    messageBox.style.color = '#F44336';
+                    messageBox.textContent = 'Bir hata oluştu, lütfen tekrar deneyin.';
+                });
+            };
+        });
+        </script>
+
+        <style>
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: var(--dark-bg, #1a1a1a);
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            color: var(--text-light, #fff);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color, #333);
+            padding-bottom: 10px;
+        }
+        .close-modal {
+            color: var(--text-light, #fff);
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-modal:hover {
+            color: var(--text-muted, #aaa);
+        }
+        .modal-body .form-group label {
+            color: var(--text-light, #fff);
+        }
+        .modal-body .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color, #333);
+            border-radius: 8px;
+            background: var(--light-bg, #222);
+            color: var(--text-light, #fff);
+            font-size: 16px;
+        }
+        .modal-body .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-color, #00c2cb);
+            box-shadow: 0 0 10px var(--accent-color, #00c2cb33);
+        }
+        .modal-body .button {
+            width: 100%;
+            margin-top: 10px;
+        }
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 32px;
+            padding: 24px;
+            background-color: var(--dark-bg, #181c24);
+            border-radius: 16px;
+            flex-wrap: wrap;
+            position: relative;
+        }
+        .profile-header .profile-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: var(--light-bg, #23283a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .profile-header .profile-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .profile-header .profile-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+        }
+        .profile-header .profile-name {
+            font-size: 2rem;
+            color: var(--text-light, #fff);
+            font-weight: 600;
+            margin: 0;
+        }
+        .profile-header .add-post-btn,
+        #change-password-btn.button {
+            width: auto;
+            min-width: 140px;
+            max-width: 200px;
+            padding: 8px 18px;
+            justify-content: center;
+            margin-top: 0;
+        }
+        .profile-header .profile-stats {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-left: auto;
+            flex-wrap: wrap;
+        }
+        .profile-header .profile-description {
+            flex-basis: 100%;
+            margin-top: 16px;
+            color: var(--text-muted, #b0b8c1);
+            font-size: 1rem;
+        }
+        .profile-followers {
+            color: var(--text-muted, #b0b8c1);
+            font-size: 1rem;
+            margin-top: 2px;
+            margin-left: 2px;
+        }
+        @media (max-width: 900px) {
+            .profile-header {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: left;
+                gap: 18px;
+            }
+            .profile-header .profile-stats {
+                margin-left: 0;
+            }
+        }
+        #change-password-btn.button {
+            background-color: var(--accent-color, #00c2cb) !important;
+            color: white !important;
+            border-radius: 8px !important;
+            padding: 8px 18px !important;
+            font-size: 14px !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 5px !important;
+            text-decoration: none !important;
+            transition: background 0.2s !important;
+            border: none !important;
+            min-width: 140px !important;
+            max-width: 200px !important;
+            width: auto !important;
+            justify-content: center !important;
+            margin-top: 0 !important;
+            box-sizing: border-box !important;
+        }
+        #change-password-btn.button:hover {
+            background-color: #00a9b1 !important;
+        }
+        </style>
+
+        <div class="gallery-section">
+            <h2 class="section-title">Gönderiler</h2>
+            {% if topluluk %}
+                {% with posts=topluluk.posts.all %}
+                    {% if posts %}
+                        <div class="gallery-grid">
+                            {% for post in posts %}
+                                <div class="gallery-item">
+                                    <a href="{% url 'topluluk_detail' topluluk.id %}">
+                                        {% if post.image %}
+                                            <img src="{{ post.image.url }}" alt="{{ post.title }}">
+                                        {% else %}
+                                            <div style="display:flex; align-items:center; justify-content:center; width:100%; height:100%; color:var(--text-muted); text-align:center; padding:10px; background-color:var(--light-bg);">
+                                                <span>{{ post.title }}</span>
+                                            </div>
+                                        {% endif %}
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <p>Henüz hiç gönderi bulunmamaktadır. Gönderi eklemek için "Gönderi Ekle" butonuna tıklayabilirsiniz.</p>
+                        </div>
+                    {% endif %}
+                {% endwith %}
+            {% else %}
+                <div class="alert alert-warning">
+                    <p>Topluluk bilgisi bulunamadı. Lütfen site yöneticisiyle iletişime geçin.</p>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+{% endblock %}
